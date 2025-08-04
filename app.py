@@ -193,9 +193,10 @@ def vistoria():
 
 def gerar_pdf_programacao_assinatura(data, tipo, veiculos):
     try:
-        locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
-    except:
-        locale.setlocale(locale.LC_TIME, 'Portuguese_Brazil.1252')
+      locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
+    except locale.Error:
+        locale.setlocale(locale.LC_TIME, '')
+
 
     tmp_dir = "/tmp"
     os.makedirs(tmp_dir, exist_ok=True)
@@ -418,9 +419,9 @@ def relatorio_mensal():
 
     # Gerar PDF
     try:
-        locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
-    except:
-        locale.setlocale(locale.LC_TIME, 'Portuguese_Brazil.1252')
+       locale.setlocale(locale.LC_TIME, 'pt_BR.UTF-8')
+    except locale.Error:
+        locale.setlocale(locale.LC_TIME, '')
 
     os.makedirs("relatorios", exist_ok=True)
     nome_arquivo = f"relatorios/relatorio_{mes:02d}_{ano}.pdf"
