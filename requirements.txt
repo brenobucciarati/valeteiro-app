@@ -6,4 +6,6 @@ Flask-Bcrypt
 APScheduler
 reportlab
 plotly
+Babel
 gunicorn
+
