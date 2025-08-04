@@ -90,7 +90,7 @@ def login():
         else:
             return render_template("login.html", erro="Usuário ou senha inválidos")
 
-    return render_template("index.html")
+    return render_template("login.html")
 
 @app.route("/logout")
 @login_required
@@ -593,4 +593,5 @@ if __name__ == "__main__":
         
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
