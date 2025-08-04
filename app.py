@@ -11,6 +11,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import cm
 from flask_migrate import Migrate
+from babel.dates import format_date
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_bcrypt import Bcrypt
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -104,6 +105,7 @@ def reset_programacoes():
     db.session.commit()
     return redirect(url_for("programacao"))
 
+
 @app.route("/")
 @login_required
 def home():
@@ -195,8 +197,10 @@ def gerar_pdf_programacao_assinatura(data, tipo, veiculos):
     except:
         locale.setlocale(locale.LC_TIME, 'Portuguese_Brazil.1252')
 
-    os.makedirs("pdfs", exist_ok=True)
-    nome_arquivo = f"pdfs/programacao_{data.strftime('%Y-%m-%d')}.pdf"
+    tmp_dir = "/tmp"
+    os.makedirs(tmp_dir, exist_ok=True)
+    nome_arquivo = os.path.join(tmp_dir, f"programacao_{data.strftime('%Y-%m-%d')}.pdf")
+
     doc = SimpleDocTemplate(nome_arquivo, pagesize=A4,
                             rightMargin=2*cm, leftMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm)
 
@@ -218,7 +222,7 @@ def gerar_pdf_programacao_assinatura(data, tipo, veiculos):
         numero = str(v.numero_frota)
         if v.id in remarcados_set:
             numero += " (REMARCADO)"
-        data_formatada = data.strftime('%A, %d de %B de %Y').replace(" 0", " ").capitalize()
+        data_formatada = format_date(data, format='full', locale='pt_BR')
         tabela_data.append([data_formatada, numero])
 
     tabela = Table(tabela_data, colWidths=[350, 100])
@@ -588,6 +592,3 @@ if __name__ == "__main__":
         
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-
-
-
