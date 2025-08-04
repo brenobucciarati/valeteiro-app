@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard de Vistorias{% endblock %}
+
+{% block content %}
+<h2 class="mt-4">📊 Gráfico de Vistorias por Veículo</h2>
+
+<form method="get" class="row g-3 mt-3">
+    <div class="col-md-2">
+        <label for="data" class="form-label">Filtrar por data:</label>
+        <input type="date" id="data" name="data" class="form-control" value="{{ data_filtro }}">
+    </div>
+    <div class="col-md-2">
+        <label for="mes" class="form-label">Mês:</label>
+        <input type="number" id="mes" name="mes" class="form-control" min="1" max="12" value="{{ mes }}">
+    </div>
+    <div class="col-md-2">
+        <label for="ano" class="form-label">Ano:</label>
+        <input type="number" id="ano" name="ano" class="form-control" min="2020" max="2100" value="{{ ano }}">
+    </div>
+    <div class="col-md-2">
+        <label for="frota" class="form-label">Filtro por veículo:</label>
+        <input type="text" id="frota" name="frota" class="form-control" value="{{ frota }}">
+    </div>
+    <div class="col-md-2 align-self-end">
+        <button type="submit" class="btn btn-outline-primary w-100">🔍 Filtrar</button>
+    </div>
+    <div class="col-md-2 align-self-end text-end">
+        <a href="/exportar_dashboard/png?mes={{ mes }}&ano={{ ano }}&frota={{ frota }}" class="btn btn-success">🖼️ PNG</a>
+        <a href="/exportar_dashboard/pdf?mes={{ mes }}&ano={{ ano }}&frota={{ frota }}" class="btn btn-primary">📄 PDF</a>
+    </div>
+</form>
+
+<div class="mt-4">
+    {{ grafico|safe }}
+</div>
+
+{% if relatorio_url %}
+<div class="text-center mt-4">
+    <a href="{{ relatorio_url }}" class="btn btn-dark">
+        📥 Baixar Relatório Mensal em PDF
+    </a>
+</div>
+{% endif %}
+
+<hr class="my-5">
+
+<h4 class="text-warning">🚨 Veículos Pendentes de {{ data_filtro.strftime('%d/%m/%Y') }}</h4>
+
+<table class="table table-dark table-bordered text-center mt-3">
+    <thead>
+        <tr>
+            <th>Nº Frota</th>
+            <th>Tipo de Frota</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for p in pendentes %}
+        <tr>
+            <td>{{ p.veiculo.numero_frota }}</td>
+            <td>{{ p.veiculo.tipo_frota }}</td>
+        </tr>
+    {% else %}
+        <tr><td colspan="2">✅ Nenhum veículo pendente nesta data.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

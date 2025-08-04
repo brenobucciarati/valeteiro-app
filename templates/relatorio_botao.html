@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Relatório Mensal{% endblock %}
+
+{% block content %}
+<div class="mt-4">
+    <h2>Relatório Mensal de Vistorias</h2>
+    <p class="lead">Mês: <strong>{{ mes }}</strong> / Ano: <strong>{{ ano }}</strong></p>
+
+    <a href="{{ link }}" target="_blank" class="btn btn-success">
+        📄 Baixar Relatório em PDF
+    </a>
+</div>
+{% endblock %}

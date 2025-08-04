@@ -1,0 +1,104 @@
+body {
+    background-color: #1e1e2f;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar {
+    background-color: #111122;
+}
+
+.nav-link,
+.navbar-brand {
+    color: #e0e0e0 !important;
+}
+
+.nav-link:hover {
+    color: #00ccff !important;
+    text-decoration: underline;
+}
+
+.container {
+    margin-top: 30px;
+}
+
+.table {
+    background-color: #2a2a40;
+    color: #fff;
+}
+
+.table th {
+    background-color: #333355;
+    color: #ffcc00;
+}
+
+.table tr:nth-child(even) {
+    background-color: #252538;
+}
+
+.btn-primary {
+    background-color: #0055aa;
+    border-color: #0055aa;
+}
+
+.btn-primary:hover {
+    background-color: #0077cc;
+    border-color: #0077cc;
+}
+
+.btn-success {
+    background-color: #227744;
+    border-color: #227744;
+}
+
+.btn-success:hover {
+    background-color: #33aa66;
+    border-color: #33aa66;
+}
+
+.btn-warning {
+    background-color: #ffcc00;
+    color: #222;
+    border-color: #ffcc00;
+}
+
+.btn-warning:hover {
+    background-color: #ffdd33;
+    border-color: #ffdd33;
+}
+
+footer {
+    background-color: #111122;
+    color: #777;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+    background-color: #2e2e40;
+    color: #fff;
+    border: 1px solid #444;
+}
+
+input[type="checkbox"] {
+    accent-color: #00ccff;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #00ccff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 204, 255, 0.25);
+    outline: none;
+}
+
+a {
+    color: #66d9ef;
+}
+
+a:hover {
+    color: #00ccff;
+    text-decoration: underline;
+}

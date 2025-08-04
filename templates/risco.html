@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Ranking de Risco{% endblock %}
+
+{% block content %}
+<h2 class="mt-4">Ranking de Risco - {{ mes }}/{{ ano }}</h2>
+
+<!-- Tabela de risco -->
+<table class="table table-bordered table-hover mt-4">
+    <thead class="table-warning text-danger">
+        <tr>
+            <th>Veículo</th>
+            <th>Faltas</th>
+            <th>Vistoriado</th>
+            <th>Apontamentos</th>
+            <th>Nível de Risco</th>
+            <th>Último Motivo</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for r in riscos %}
+        <tr class="{% if r.nivel == 'ALTO' %}table-danger{% elif r.nivel == 'MÉDIO' %}table-warning{% else %}table-success{% endif %}">
+            <td>
+                <a href="/veiculo/{{ r.numero }}" class="text-dark fw-bold text-decoration-none bg-white px-2 py-1 rounded">
+                    {{ r.numero }}
+                </a>
+            </td>
+            <td>{{ r.faltas }}</td>
+            <td>{{ r.vistoriados }}</td>
+            <td>{{ r.apontamentos }}</td>
+            <td>
+                <strong class="{% if r.nivel == 'ALTO' %}text-danger
+                                {% elif r.nivel == 'MÉDIO' %}text-warning
+                                {% else %}text-success{% endif %}">
+                    {{ r.nivel }}
+                </strong>
+            </td>
+            <td>{{ r.ultimo_motivo or "—" }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

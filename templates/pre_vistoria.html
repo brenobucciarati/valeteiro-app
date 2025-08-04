@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Liberar Veículos para Vistoria{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">✅ Liberar Veículos Programados para {{ data }}</h2>
+    <form method="post">
+        <table class="table table-dark table-bordered text-center align-middle">
+            <thead>
+                <tr>
+                    <th>Liberar?</th>
+                    <th>Nº Frota</th>
+                    <th>Tipo</th>
+                    <th>Remarcado?</th>
+                    <th>Motivo (se não liberado)</th>
+                    <th>Descrição (se "Outro")</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for p in programacoes %}
+                <tr>
+                    <td>
+                        <input type="checkbox" name="liberar_{{ p.id }}" id="check_{{ p.id }}"
+                               {% if p.habilitado_para_vistoria %}checked{% endif %}>
+                    </td>
+                    <td>{{ p.veiculo.numero_frota }}</td>
+                    <td>{{ p.veiculo.tipo_frota }}</td>
+                    <td>{% if p.remarcado_para == hoje %}✅ Sim{% else %}❌ Não{% endif %}</td>
+                    <td>
+                        <select name="motivo_{{ p.id }}" class="form-select bg-dark text-white">
+                            <option value="">-- Selecione --</option>
+                            <option value="Retido">Retido</option>
+                            <option value="Serviço">Serviço</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="text" name="descricao_{{ p.id }}" class="form-control bg-dark text-white"
+                               placeholder="Detalhe se selecionou 'Outro'">
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-success btn-lg px-4">Salvar Liberação</button>
+            <a href="/" class="btn btn-outline-light btn-lg px-4 ms-3">Voltar</a>
+        </div>
+    </form>
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+    const linhas = document.querySelectorAll("tbody tr");
+    const form = document.querySelector("form");
+
+    linhas.forEach(linha => {
+        const checkbox = linha.querySelector('input[type="checkbox"]');
+        const select = linha.querySelector('select');
+        const inputDesc = linha.querySelector('input[type="text"]');
+
+        function atualizarCampos() {
+            const liberado = checkbox.checked;
+            select.disabled = liberado;
+            inputDesc.disabled = liberado || select.value !== "Outro";
+        }
+
+        checkbox.addEventListener("change", atualizarCampos);
+        select.addEventListener("change", atualizarCampos);
+        atualizarCampos(); // Inicializa campos
+    });
+
+    form.addEventListener("submit", function (e) {
+        let erro = false;
+        let mensagens = [];
+
+        linhas.forEach(linha => {
+            const veiculo = linha.querySelector("td:nth-child(2)").innerText;
+            const checkbox = linha.querySelector('input[type="checkbox"]');
+            const select = linha.querySelector('select');
+            const inputDesc = linha.querySelector('input[type="text"]');
+
+            if (!checkbox.checked) {
+                if (!select.value) {
+                    erro = true;
+                    mensagens.push(`Selecione o motivo para o veículo ${veiculo}.`);
+                } else if (select.value === "Outro" && !inputDesc.value.trim()) {
+                    erro = true;
+                    mensagens.push(`Preencha a descrição para o motivo 'Outro' do veículo ${veiculo}.`);
+                }
+            }
+        });
+
+        if (erro) {
+            e.preventDefault();
+            alert("⚠️ Corrija os seguintes erros:\n\n" + mensagens.join("\n"));
+        }
+    });
+});
+</script>
+
+</div>
+{% endblock %}
