@@ -104,10 +104,10 @@ def reset_programacoes():
     db.session.commit()
     return redirect(url_for("programacao"))
 
-
 @app.route("/")
+@login_required
 def home():
-    return render_template("index.html")
+    return redirect(url_for("programacao"))
 @app.route("/programacao")
 def programacao():
     gerar_programacao_diaria()
@@ -584,3 +584,4 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+
