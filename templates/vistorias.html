@@ -3,30 +3,39 @@
 {% block title %}Vistoria Diária{% endblock %}
 
 {% block content %}
-<h2 class="mt-4">Vistoria de {{ data }}</h2>
-<form method="POST">
-    <table class="table table-bordered table-hover mt-3">
-        <thead class="table-dark">
-            <tr>
-                <th>Veículo</th>
-                <th>Compareceu</th>
-                <th>Observação</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for p in programacoes %}
-            <tr>
-                <td>{{ p.veiculo.numero_frota }} ({{ p.veiculo.tipo_frota }})</td>
-                <td class="text-center">
-                    <input type="checkbox" name="veiculo_{{ p.id }}" {% if p.compareceu %}checked{% endif %}>
-                </td>
-                <td>
-                    <input type="text" name="obs_{{ p.id }}" class="form-control" value="{{ p.observacao or '' }}">
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    <button type="submit" class="btn btn-primary mt-3">Salvar Vistoria</button>
-</form>
+<div class="container mt-4">
+    <h2 class="mb-4">Vistoria de {{ data }}</h2>
+
+    {% if programacoes %}
+    <form method="POST">
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Veículo</th>
+                    <th>Compareceu</th>
+                    <th>Observação</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for p in programacoes %}
+                <tr>
+                    <td>{{ p.veiculo.numero_frota }} ({{ p.veiculo.tipo_frota }})</td>
+                    <td class="text-center">
+                        <input type="checkbox" name="veiculo_{{ p.id }}" {% if p.compareceu %}checked{% endif %}>
+                    </td>
+                    <td>
+                        <input type="text" name="obs_{{ p.id }}" class="form-control" value="{{ p.observacao or '' }}">
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary mt-3">Salvar Vistoria</button>
+    </form>
+    {% else %}
+    <div class="alert alert-info text-center mt-5" role="alert">
+        Nenhuma vistoria programada para o dia {{ data }}.
+    </div>
+    {% endif %}
+</div>
 {% endblock %}
