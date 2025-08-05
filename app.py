@@ -590,22 +590,16 @@ def ranking():
 
     return render_template("ranking.html", riscos=risco_lista, mes=mes, ano=ano, frota=frota_filtro)
 
+from datetime import date
 
-#@app.route("/reset_dados", methods=["POST"])
+@app.route("/reset_dados", methods=["POST"])
 @login_required
 def reset_dados():
-    from datetime import date
-
-    # Apaga todas as programações anteriores a hoje
     hoje = date.today()
     Programacao.query.filter(Programacao.data < hoje).delete()
-
-    # Opcional: Apaga tudo (inclusive de hoje, se quiser reset total)
-    # db.session.query(Programacao).delete()
-
     db.session.commit()
-    return redirect(url_for("programacao"))
 
+    return redirect(url_for("programacao"))
 
 if __name__ == "__main__":
     from flask_migrate import upgrade
@@ -615,3 +609,4 @@ if __name__ == "__main__":
         
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
