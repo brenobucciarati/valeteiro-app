@@ -274,13 +274,14 @@ from datetime import datetime
 @app.route("/dashboard")
 def dashboard():
     from datetime import datetime
-    import os  # ← para criar pasta static
+    import os
+    import plotly.io as pio  # Necessário para salvar imagem
 
     mes = int(request.args.get("mes", date.today().month))
     ano = int(request.args.get("ano", date.today().year))
     frota_filtro = request.args.get("frota")
-
     data_filtro_str = request.args.get("data_filtro")
+
     if data_filtro_str:
         try:
             data_filtro = datetime.strptime(data_filtro_str, "%Y-%m-%d").date()
@@ -337,9 +338,16 @@ def dashboard():
     fig = go.Figure(data=[trace1, trace2, trace3], layout=layout)
     grafico_html = fig.to_html(full_html=False)
 
-    os.makedirs("static", exist_ok=True)  # ← cria a pasta se não existir
-    #fig.write_image("static/grafico_dashboard.png", width=1000, height=600)
+    # 🖼️ Gerar imagem PNG para PDF
+    try:
+        os.makedirs("static", exist_ok=True)
+        img_bytes = pio.to_image(fig, format="png", width=1000, height=600)
+        with open("static/grafico_dashboard.png", "wb") as f:
+            f.write(img_bytes)
+    except Exception as e:
+        print(f"[ERRO] Falha ao salvar imagem do gráfico: {e}")
 
+    # 🔍 Veículos pendentes até ontem
     pendentes = Programacao.query.filter(
         Programacao.data < date.today(),
         Programacao.compareceu == False,
@@ -645,4 +653,3 @@ if __name__ == "__main__":
         
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-
