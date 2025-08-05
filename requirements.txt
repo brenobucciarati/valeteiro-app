@@ -6,6 +6,7 @@ Flask-Bcrypt
 APScheduler
 reportlab
 plotly
+kaleido
+fpdf2==2.8.3
 Babel
 gunicorn
-
