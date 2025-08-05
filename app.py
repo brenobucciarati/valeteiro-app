@@ -338,7 +338,7 @@ def dashboard():
     grafico_html = fig.to_html(full_html=False)
 
     os.makedirs("static", exist_ok=True)  # ← cria a pasta se não existir
-    fig.write_image("static/grafico_dashboard.png", width=1000, height=600)
+    #fig.write_image("static/grafico_dashboard.png", width=1000, height=600)
 
     pendentes = Programacao.query.filter(
         Programacao.data < date.today(),
@@ -645,3 +645,4 @@ if __name__ == "__main__":
         
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
