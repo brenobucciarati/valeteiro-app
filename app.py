@@ -17,6 +17,7 @@ from flask_bcrypt import Bcrypt
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from datetime import timedelta
+from fpdf import FPDF  # ✅ Correto para fpdf2
 import os
 import locale
 
@@ -286,8 +287,6 @@ def dashboard():
     else:
         data_filtro = date.today()
 
-    # restante do código...
-
     mes = data_filtro.month
     ano = data_filtro.year
     frota_filtro = request.args.get("frota")
@@ -298,12 +297,12 @@ def dashboard():
         db.func.count(Programacao.id).label("total"),
         db.func.sum(db.func.cast(Programacao.compareceu, db.Integer)).label("vistoriados"),
         db.func.count(Programacao.observacao).label("apontamentos")
-      ) .join(Programacao).filter(
-    extract('month', Programacao.data) == mes,
-    extract('year', Programacao.data) == ano,
-    Programacao.data < date.today()
-)
-      
+    ).join(Programacao).filter(
+        extract('month', Programacao.data) == mes,
+        extract('year', Programacao.data) == ano,
+        Programacao.data < date.today()
+    )
+
     if frota_filtro:
         query = query.filter(Veiculo.numero_frota == int(frota_filtro))
 
@@ -328,29 +327,36 @@ def dashboard():
         barmode='group',
         xaxis_title='Veículo (Nº Frota)',
         yaxis_title='Ocorrências',
-        height=600
+        height=600,
+        template='plotly_dark',              # 🌙 Tema escuro
+        paper_bgcolor='#121212',             # Cor de fundo (escura)
+        plot_bgcolor='#121212',
+        font=dict(color='white')             # Texto branco
     )
 
     fig = go.Figure(data=[trace1, trace2, trace3], layout=layout)
     grafico_html = fig.to_html(full_html=False)
 
-    # 🔍 Pendentes do dia
+    # Salva PNG para download/exportação
+    fig.write_image("static/grafico_dashboard.png", width=1000, height=600)
+
+    # 🔍 Pendentes do dia anterior
     pendentes = Programacao.query.filter(
-    Programacao.data < date.today(),  # ⚠️ apenas dias anteriores
-    Programacao.compareceu == False,
-    Programacao.habilitado_para_vistoria == True
-).join(Veiculo).order_by(Veiculo.numero_frota).all()
+        Programacao.data < date.today(),
+        Programacao.compareceu == False,
+        Programacao.habilitado_para_vistoria == True
+    ).join(Veiculo).order_by(Veiculo.numero_frota).all()
 
     return render_template(
-    "dashboard.html",
-    grafico=Markup(grafico_html),
-    mes=mes,
-    ano=ano,
-    frota=frota_filtro or "",
-    data_filtro=data_filtro,  # envia como objeto datetime.date
-    pendentes=pendentes,
-    relatorio_url=url_for('relatorio_mensal', mes=mes, ano=ano)
-)
+        "dashboard.html",
+        grafico=Markup(grafico_html),
+        mes=mes,
+        ano=ano,
+        frota=frota_filtro or "",
+        data_filtro=data_filtro,
+        pendentes=pendentes,
+        relatorio_url=url_for('relatorio_mensal', mes=mes, ano=ano)
+    )
 
 @app.route("/risco")
 def risco():
@@ -590,7 +596,6 @@ def ranking():
 
     return render_template("ranking.html", riscos=risco_lista, mes=mes, ano=ano, frota=frota_filtro)
 
-from datetime import date
 
 @app.route("/reset_dados", methods=["POST"])
 @login_required
@@ -601,6 +606,35 @@ def reset_dados():
 
     return redirect(url_for("programacao"))
 
+
+@app.route("/exportar_dashboard/png")
+def exportar_dashboard_png():
+    return send_file("static/grafico_dashboard.png", mimetype="image/png", as_attachment=True)
+
+from fpdf import FPDF
+import os
+
+@app.route("/exportar_dashboard/pdf")
+def exportar_dashboard_pdf():
+    img_path = "static/grafico_dashboard.png"
+
+    if not os.path.exists(img_path):
+        return "Imagem do gráfico não encontrada", 404
+
+    # Criar PDF e inserir a imagem
+    pdf = FPDF(orientation="L", unit="mm", format="A4")
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.cell(0, 10, "Resumo de Vistorias - Dashboard", ln=True, align="C")
+    pdf.ln(10)
+    pdf.image(img_path, x=10, y=30, w=270)  # Ajuste conforme necessário
+
+    output_path = "static/grafico_dashboard.pdf"
+    pdf.output(output_path)
+
+    return send_file(output_path, mimetype="application/pdf", as_attachment=True)
+
+
 if __name__ == "__main__":
     from flask_migrate import upgrade
     with app.app_context():
@@ -609,4 +643,3 @@ if __name__ == "__main__":
         
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-
