@@ -3,34 +3,92 @@
 {% block title %}Início{% endblock %}
 
 {% block content %}
-<div class="text-center mt-5">
-    <h1 class="display-4">🚐 Sistema de Vistorias de Veículos</h1>
-    <p class="lead">Bem-vindo! Use o menu abaixo para navegar entre as funcionalidades.</p>
-    <hr class="my-4">
+<style>
+    .dashboard-container {
+        background-color: #1e1e1e;
+        padding: 3rem;
+        border-radius: 1rem;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+    }
+
+    .dashboard-title {
+        color: #ffffff;
+        font-weight: bold;
+        font-size: 2.5rem;
+    }
+
+    .dashboard-subtitle {
+        color: #bbbbbb;
+        font-size: 1.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .btn-purple {
+        background: #6a0dad;
+        color: #fff;
+        font-size: 1.2rem;
+        padding: 1rem;
+        border: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 10px #6a0dad80;
+        border-radius: 0.6rem;
+    }
+
+    .btn-purple:hover {
+        background: #5a0099;
+        transform: scale(1.05);
+        box-shadow: 0 0 15px #6a0dadcc;
+    }
+</style>
+
+<div class="dashboard-container text-center mt-5">
+    <h1 class="dashboard-title">🚐 Sistema de Vistorias de Veículos</h1>
+    <p class="dashboard-subtitle">Bem-vindo! Use o menu abaixo para navegar entre as funcionalidades.</p>
+
     <div class="row justify-content-center">
-        <div class="col-md-3">
-            <a href="/programacao" class="btn btn-outline-warning btn-lg w-100 mb-3">🗕️ Programação</a>
+        <div class="col-md-4 col-lg-3 mb-3">
+            <a href="/programacao" class="btn btn-purple w-100">🗓️ Programação</a>
         </div>
-        <div class="col-md-3">
-            <a href="/pre_vistoria" class="btn btn-outline-secondary btn-lg w-100 mb-3">✅ Liberar Veículos para Vistoria</a>
+        <div class="col-md-4 col-lg-3 mb-3">
+            <a href="/pre_vistoria" class="btn btn-purple w-100">✅ Liberar Veículos</a>
         </div>
-        <div class="col-md-3">
-            <a href="/vistoria" class="btn btn-outline-success btn-lg w-100 mb-3">📝 Vistoria</a>
+        <div class="col-md-4 col-lg-3 mb-3">
+            <a href="/vistoria" class="btn btn-purple w-100">📝 Vistoria</a>
         </div>
-        <div class="col-md-3">
-            <a href="/dashboard" class="btn btn-outline-info btn-lg w-100 mb-3">📊 Dashboard</a>
+        <div class="col-md-4 col-lg-3 mb-3">
+            <a href="/dashboard" class="btn btn-purple w-100">📊 Dashboard</a>
         </div>
-        <div class="col-md-3">
-            <a href="/risco" class="btn btn-outline-danger btn-lg w-100 mb-3">⚠️ Risco</a>
+        <div class="col-md-4 col-lg-3 mb-3">
+            <a href="/risco" class="btn btn-purple w-100">⚠️ Risco</a>
         </div>
-        <div class="col-md-3">
-            <a href="/relatorio_botao" class="btn btn-outline-primary btn-lg w-100 mb-3">📄 Relatório</a>
+        <div class="col-md-4 col-lg-3 mb-3">
+            <a href="/relatorio_botao" class="btn btn-purple w-100">📄 Relatório</a>
         </div>
-        <div class="col-md-3">
-            <form method="POST" action="{{ url_for('reset_dados') }}" onsubmit="return confirm('⚠️ Tem certeza que deseja RESETAR TODOS OS DADOS?');">
-                <button type="submit" class="btn btn-outline-danger btn-lg w-100 mb-3">🧨 Resetar Tudo</button>
-            </form>
-        </div>
-    </div>
+    <style>
+    .btn-reset {
+        background-color: #dc3545;
+        color: white;
+        font-size: 1.2rem;
+        padding: 1rem;
+        border: none;
+        border-radius: 0.6rem;
+        transition: 0.3s;
+        box-shadow: 0 0 10px #dc354580;
+    }
+
+    .btn-reset:hover {
+        background-color: #c82333;
+        transform: scale(1.05);
+        box-shadow: 0 0 15px #ff0000aa;
+    }
+</style>
+
+<div class="col-md-4 col-lg-3 mb-3">
+    <form method="POST" action="{{ url_for('reset_dados') }}" onsubmit="return confirm('⚠️ Tem certeza que deseja RESETAR TODOS OS DADOS?');">
+        <button type="submit" class="btn-reset w-100">
+            🧨 Resetar Tudo
+        </button>
+    </form>
 </div>
+
 {% endblock %}
