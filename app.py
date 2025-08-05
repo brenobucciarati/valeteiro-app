@@ -17,7 +17,7 @@ from flask_bcrypt import Bcrypt
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from datetime import timedelta
-from fpdf import FPDF  
+from fpdf import FPDF  # ✅ Correto para fpdf2
 import os
 import locale
 
@@ -274,6 +274,8 @@ from datetime import datetime
 @app.route("/dashboard")
 def dashboard():
     from datetime import datetime
+    import os  # ← para criar pasta static
+
     mes = int(request.args.get("mes", date.today().month))
     ano = int(request.args.get("ano", date.today().year))
     frota_filtro = request.args.get("frota")
@@ -289,9 +291,7 @@ def dashboard():
 
     mes = data_filtro.month
     ano = data_filtro.year
-    frota_filtro = request.args.get("frota")
 
-    # 🔢 Gráfico mensal
     query = db.session.query(
         Veiculo.numero_frota,
         db.func.count(Programacao.id).label("total"),
@@ -303,7 +303,7 @@ def dashboard():
         Programacao.data < date.today()
     )
 
-    if frota_filtro:
+    if frota_filtro and frota_filtro.isdigit():
         query = query.filter(Veiculo.numero_frota == int(frota_filtro))
 
     query = query.group_by(Veiculo.numero_frota).order_by(Veiculo.numero_frota)
@@ -328,19 +328,18 @@ def dashboard():
         xaxis_title='Veículo (Nº Frota)',
         yaxis_title='Ocorrências',
         height=600,
-        template='plotly_dark',              # 🌙 Tema escuro
-        paper_bgcolor='#121212',             # Cor de fundo (escura)
+        template='plotly_dark',
+        paper_bgcolor='#121212',
         plot_bgcolor='#121212',
-        font=dict(color='white')             # Texto branco
+        font=dict(color='white')
     )
 
     fig = go.Figure(data=[trace1, trace2, trace3], layout=layout)
     grafico_html = fig.to_html(full_html=False)
 
-    # Salva PNG para download/exportação
+    os.makedirs("static", exist_ok=True)  # ← cria a pasta se não existir
     fig.write_image("static/grafico_dashboard.png", width=1000, height=600)
 
-    # 🔍 Pendentes do dia anterior
     pendentes = Programacao.query.filter(
         Programacao.data < date.today(),
         Programacao.compareceu == False,
@@ -606,31 +605,37 @@ def reset_dados():
 
     return redirect(url_for("programacao"))
 
-
 @app.route("/exportar_dashboard/png")
 def exportar_dashboard_png():
     return send_file("static/grafico_dashboard.png", mimetype="image/png", as_attachment=True)
 
+
 @app.route("/exportar_dashboard/pdf")
 def exportar_dashboard_pdf():
+    from fpdf import FPDF
+    import os
+    from flask import send_file, abort
+
     img_path = "static/grafico_dashboard.png"
-
     if not os.path.exists(img_path):
-        return "Imagem do gráfico não encontrada", 404
+        abort(404, description="Imagem do gráfico não encontrada")
 
-    # Criar PDF e inserir a imagem
     pdf = FPDF(orientation="L", unit="mm", format="A4")
     pdf.add_page()
     pdf.set_font("Arial", size=12)
     pdf.cell(0, 10, "Resumo de Vistorias - Dashboard", ln=True, align="C")
     pdf.ln(10)
-    pdf.image(img_path, x=10, y=30, w=270)  # Ajuste conforme necessário
+
+    pdf_w = 297  # A4 paisagem
+    img_w = 270
+    margin = (pdf_w - img_w) / 2
+
+    pdf.image(img_path, x=margin, y=40, w=img_w)
 
     output_path = "static/grafico_dashboard.pdf"
     pdf.output(output_path)
 
     return send_file(output_path, mimetype="application/pdf", as_attachment=True)
-
 
 if __name__ == "__main__":
     from flask_migrate import upgrade
@@ -640,4 +645,3 @@ if __name__ == "__main__":
         
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-
