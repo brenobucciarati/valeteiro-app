@@ -17,7 +17,7 @@ from flask_bcrypt import Bcrypt
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from datetime import timedelta
-from fpdf import FPDF  # ✅ Correto para fpdf2
+from fpdf import FPDF  
 import os
 import locale
 
@@ -611,9 +611,6 @@ def reset_dados():
 def exportar_dashboard_png():
     return send_file("static/grafico_dashboard.png", mimetype="image/png", as_attachment=True)
 
-from fpdf import FPDF
-import os
-
 @app.route("/exportar_dashboard/pdf")
 def exportar_dashboard_pdf():
     img_path = "static/grafico_dashboard.png"
@@ -643,3 +640,4 @@ if __name__ == "__main__":
         
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
