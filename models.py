@@ -16,7 +16,7 @@ class Programacao(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.Date, nullable=False)
     veiculo_id = db.Column(db.Integer, db.ForeignKey('veiculos.id'), nullable=False)
-    compareceu = db.Column(db.Boolean, default=False)
+    compareceu = db.Column(db.Boolean, nullable=True, default=None)
     remarcado_para = db.Column(db.Date, nullable=True)
     observacao = db.Column(db.Text, nullable=True)
     motivo_classificado = db.Column(db.String(50), nullable=True)
