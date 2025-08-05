@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, send_file
+from flask import Flask, render_template, request, redirect, url_for, send_file, session
 from datetime import date, timedelta
 from config import Config
 from models import db, Veiculo, Programacao, User  # Certifique-se de importar User aqui
@@ -9,18 +9,20 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
-from reportlab.lib.units import cm
+from reportlab.lib.units import cm 
 from flask_migrate import Migrate
 from babel.dates import format_date
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_bcrypt import Bcrypt
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
+from datetime import timedelta
 import os
 import locale
 
 # ✅ Inicialização da app e configuração
 app = Flask(__name__)
+app.permanent_session_lifetime = timedelta(minutes=30)
 app.config.from_object(Config)
 
 # ✅ Banco de dados e migrações
@@ -34,6 +36,7 @@ bcrypt = Bcrypt(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+login_manager.login_message = None  # Evita mensagens padrão do Flask-Login
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -79,6 +82,10 @@ bcrypt = Bcrypt(app)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    erro = None
+    if "expired" in request.args:
+        erro = "Sessão expirada. Faça login novamente."
+
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
@@ -86,11 +93,12 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and user.check_password(password):
             login_user(user)
-            return redirect(url_for("vistoria"))  # 👈 redireciona direto
+            session.permanent = True  # 🔒 garante validade com timedelta
+            return redirect(url_for("index"))
         else:
-            return render_template("login.html", erro="Usuário ou senha inválidos")
+            erro = "Usuário ou senha inválidos"
 
-    return render_template("login.html")
+    return render_template("login.html", erro=erro)
 
 @app.route("/logout")
 @login_required
@@ -108,8 +116,8 @@ def reset_programacoes():
 
 @app.route("/")
 @login_required
-def home():
-    return redirect(url_for("programacao"))
+def index():
+    return render_template("index.html")
 @app.route("/programacao")
 def programacao():
     gerar_programacao_diaria()
@@ -160,12 +168,24 @@ def classificar_apontamento(texto):
         return "Elétrica"
     return "Outro"
 
+def ultima_data_programada():
+    ultima = db.session.query(Programacao.data) \
+        .filter(Programacao.habilitado_para_vistoria == True) \
+        .order_by(Programacao.data.desc()) \
+        .first()
+    return ultima[0] if ultima else None
 
 @app.route("/vistoria", methods=["GET", "POST"])
 def vistoria():
     gerar_programacao_diaria()
-    hoje = date.today()
-    tipo = "PAR" if hoje.day % 2 == 0 else "IMPAR"
+
+    data_vistoria = ultima_data_programada()
+
+    if not data_vistoria:
+        hoje = date.today().strftime("%d/%m/%Y")
+        return render_template("vistorias.html",
+                               data="hoje",
+                               programacoes=[])
 
     if request.method == "POST":
         for key in request.form:
@@ -187,9 +207,11 @@ def vistoria():
         db.session.commit()
         return redirect(url_for("index"))
 
-    programacoes = Programacao.query.filter_by(data=hoje, habilitado_para_vistoria=True).all()
-    return render_template("vistorias.html", data=hoje.strftime("%d/%m/%Y"), programacoes=programacoes)
+    programacoes = Programacao.query.filter_by(data=data_vistoria, habilitado_para_vistoria=True).all()
 
+    return render_template("vistorias.html",
+                           data=data_vistoria.strftime("%d/%m/%Y"),
+                           programacoes=programacoes)
 
 def gerar_pdf_programacao_assinatura(data, tipo, veiculos):
     try:
@@ -593,5 +615,3 @@ if __name__ == "__main__":
         
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-
-
