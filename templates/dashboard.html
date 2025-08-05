@@ -3,47 +3,47 @@
 {% block title %}Dashboard de Vistorias{% endblock %}
 
 {% block content %}
-<h2 class="mt-4">📊 Gráfico de Vistorias por Veículo</h2>
+<h2 class="mt-4 text-light">📊 Gráfico de Vistorias por Veículo</h2>
 
 <form method="get" class="row g-3 mt-3">
     <div class="col-md-2">
-        <label for="data" class="form-label">Filtrar por data:</label>
-        <input type="date" id="data" name="data" class="form-control" value="{{ data_filtro }}">
+        <label for="data" class="form-label text-light">Filtrar por data:</label>
+        <input type="date" id="data" name="data_filtro" class="form-control" value="{{ data_filtro.strftime('%Y-%m-%d') }}">
     </div>
     <div class="col-md-2">
-        <label for="mes" class="form-label">Mês:</label>
+        <label for="mes" class="form-label text-light">Mês:</label>
         <input type="number" id="mes" name="mes" class="form-control" min="1" max="12" value="{{ mes }}">
     </div>
     <div class="col-md-2">
-        <label for="ano" class="form-label">Ano:</label>
+        <label for="ano" class="form-label text-light">Ano:</label>
         <input type="number" id="ano" name="ano" class="form-control" min="2020" max="2100" value="{{ ano }}">
     </div>
     <div class="col-md-2">
-        <label for="frota" class="form-label">Filtro por veículo:</label>
+        <label for="frota" class="form-label text-light">Filtro por veículo:</label>
         <input type="text" id="frota" name="frota" class="form-control" value="{{ frota }}">
     </div>
     <div class="col-md-2 align-self-end">
-        <button type="submit" class="btn btn-outline-primary w-100">🔍 Filtrar</button>
+        <button type="submit" class="btn btn-outline-warning w-100">🔍 Filtrar</button>
     </div>
     <div class="col-md-2 align-self-end text-end">
-        <a href="/exportar_dashboard/png?mes={{ mes }}&ano={{ ano }}&frota={{ frota }}" class="btn btn-success">🖼️ PNG</a>
-        <a href="/exportar_dashboard/pdf?mes={{ mes }}&ano={{ ano }}&frota={{ frota }}" class="btn btn-primary">📄 PDF</a>
+        <a href="{{ url_for('exportar_dashboard_png', mes=mes, ano=ano, frota=frota) }}" class="btn btn-outline-success w-100 mb-1">🖼️ PNG</a>
+        <a href="{{ url_for('exportar_dashboard_pdf', mes=mes, ano=ano, frota=frota) }}" class="btn btn-outline-info w-100">📄 PDF</a>
     </div>
 </form>
 
-<div class="mt-4">
+<div class="mt-4 bg-dark p-3 rounded">
     {{ grafico|safe }}
 </div>
 
 {% if relatorio_url %}
 <div class="text-center mt-4">
-    <a href="{{ relatorio_url }}" class="btn btn-dark">
+    <a href="{{ relatorio_url }}" class="btn btn-outline-light btn-lg">
         📥 Baixar Relatório Mensal em PDF
     </a>
 </div>
 {% endif %}
 
-<hr class="my-5">
+<hr class="my-5 text-light">
 
 <h4 class="text-warning">🚨 Veículos Pendentes de {{ data_filtro.strftime('%d/%m/%Y') }}</h4>
 
@@ -65,5 +65,4 @@
     {% endfor %}
     </tbody>
 </table>
-
 {% endblock %}
