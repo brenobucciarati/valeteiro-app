@@ -8,5 +8,6 @@ reportlab
 plotly
 kaleido
 fpdf2==2.8.3
+Pillow
 Babel
 gunicorn
