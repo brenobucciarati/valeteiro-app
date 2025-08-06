@@ -14,17 +14,33 @@
                     <th>Veículo</th>
                     <th>Compareceu</th>
                     <th>Observação</th>
+                    <th>Repetir?</th>
                 </tr>
             </thead>
             <tbody>
             {% for p in programacoes %}
                 <tr>
                     <td>{{ p.veiculo.numero_frota }} ({{ p.veiculo.tipo_frota }})</td>
+
                     <td class="text-center">
                         <input type="checkbox" name="veiculo_{{ p.id }}" {% if p.compareceu %}checked{% endif %}>
                     </td>
+
                     <td>
                         <input type="text" name="obs_{{ p.id }}" class="form-control" value="{{ p.observacao or '' }}">
+                    </td>
+
+                    <td class="text-center">
+                        {# Define atributos de forma segura #}
+                        {% set is_disabled = p.compareceu %}
+                        {% set style = 'style="opacity: 0.4;"' if is_disabled else '' %}
+                        {% set disabled = 'disabled' if is_disabled else '' %}
+
+                        <input type="checkbox"
+                               name="repetir_{{ p.id }}"
+                               id="rep_{{ p.id }}"
+                               {{ disabled }} {{ style }}
+                               {% if p.remarcado_para %}checked{% endif %}>
                     </td>
                 </tr>
             {% endfor %}
