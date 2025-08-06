@@ -60,12 +60,27 @@ scheduler.start()
 
 def gerar_programacao_diaria():
     hoje = date.today()
+    ontem = hoje - timedelta(days=1)
     tipo = "PAR" if hoje.day % 2 == 0 else "IMPAR"
 
+    # Se já tiver programação hoje, não refaz
     if Programacao.query.filter_by(data=hoje).first():
         return
 
+    # 🔒 Se ainda tem veículos de ontem sem parecer, não roda a programação
+    pendentes_ontem = Programacao.query.filter(
+        Programacao.data == ontem,
+        Programacao.compareceu.is_(None)
+    ).all()
+
+    if pendentes_ontem:
+        print("⚠️ Existem veículos de ontem sem parecer. Programação de hoje pausada.")
+        return
+
+    # 🚐 Veículos normais do dia (par ou ímpar)
     veiculos_do_dia = Veiculo.query.filter_by(tipo_frota=tipo, status='ativo').all()
+
+    # ➕ Veículos remarcados para hoje
     remarcados_ids = db.session.query(Programacao.veiculo_id).filter_by(remarcado_para=hoje).all()
     remarcados = Veiculo.query.filter(Veiculo.id.in_([r[0] for r in remarcados_ids])).all()
 
@@ -77,9 +92,6 @@ def gerar_programacao_diaria():
 
     db.session.commit()
 
-    
-from flask_bcrypt import Bcrypt
-bcrypt = Bcrypt(app)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -179,14 +191,11 @@ def ultima_data_programada():
 @app.route("/vistoria", methods=["GET", "POST"])
 def vistoria():
     gerar_programacao_diaria()
-
     data_vistoria = ultima_data_programada()
 
     if not data_vistoria:
         hoje = date.today().strftime("%d/%m/%Y")
-        return render_template("vistorias.html",
-                               data="hoje",
-                               programacoes=[])
+        return render_template("vistorias.html", data="hoje", programacoes=[])
 
     if request.method == "POST":
         for key in request.form:
@@ -194,6 +203,7 @@ def vistoria():
                 prog_id = int(key.split("_")[1])
                 compareceu = request.form.get(key) == "on"
                 observacao = request.form.get(f"obs_{prog_id}", "")
+                repetir = request.form.get(f"repetir_{prog_id}") == "on"
 
                 prog = Programacao.query.get(prog_id)
                 prog.compareceu = compareceu
@@ -203,16 +213,19 @@ def vistoria():
                     prog.motivo_classificado = classificar_apontamento(observacao)
 
                 if not compareceu:
-                    prog.remarcado_para = proximo_dia_util()
+                    if repetir:
+                        prog.remarcado_para = proximo_dia_util()
+                    else:
+                        prog.remarcado_para = None  # Apenas faltante
 
         db.session.commit()
         return redirect(url_for("index"))
 
     programacoes = Programacao.query.filter_by(data=data_vistoria, habilitado_para_vistoria=True).all()
-
     return render_template("vistorias.html",
                            data=data_vistoria.strftime("%d/%m/%Y"),
                            programacoes=programacoes)
+
 
 def gerar_pdf_programacao_assinatura(data, tipo, veiculos):
     try:
@@ -277,6 +290,7 @@ def dashboard():
     import os
     import plotly.io as pio  # Necessário para salvar imagem
 
+    # 🎯 Parâmetros do filtro
     mes = int(request.args.get("mes", date.today().month))
     ano = int(request.args.get("ano", date.today().year))
     frota_filtro = request.args.get("frota")
@@ -285,31 +299,35 @@ def dashboard():
     if data_filtro_str:
         try:
             data_filtro = datetime.strptime(data_filtro_str, "%Y-%m-%d").date()
+            mes = data_filtro.month
+            ano = data_filtro.year
         except ValueError:
             data_filtro = date.today()
     else:
         data_filtro = date.today()
 
-    mes = data_filtro.month
-    ano = data_filtro.year
-
+    # 📊 Consulta agregada
     query = db.session.query(
         Veiculo.numero_frota,
         db.func.count(Programacao.id).label("total"),
         db.func.sum(db.func.cast(Programacao.compareceu, db.Integer)).label("vistoriados"),
-        db.func.count(Programacao.observacao).label("apontamentos")
+        db.func.count(db.case((Programacao.observacao != None, 1))).label("apontamentos")
     ).join(Programacao).filter(
         extract('month', Programacao.data) == mes,
         extract('year', Programacao.data) == ano,
         Programacao.data < date.today()
     )
 
-    if frota_filtro and frota_filtro.isdigit():
-        query = query.filter(Veiculo.numero_frota == int(frota_filtro))
+    if frota_filtro:
+        if frota_filtro.isdigit():
+            query = query.filter(Veiculo.numero_frota == int(frota_filtro))
+        else:
+            query = query.filter(Veiculo.tipo_frota.ilike(frota_filtro.upper()))
 
     query = query.group_by(Veiculo.numero_frota).order_by(Veiculo.numero_frota)
     registros = query.all()
 
+    # 📈 Dados do gráfico
     frotas = [str(r[0]) for r in registros]
     realizados = [r[2] or 0 for r in registros]
     total_dias = [r[1] or 0 for r in registros]
@@ -338,7 +356,7 @@ def dashboard():
     fig = go.Figure(data=[trace1, trace2, trace3], layout=layout)
     grafico_html = fig.to_html(full_html=False)
 
-    # 🖼️ Gerar imagem PNG para PDF
+    # 🖼️ Exporta gráfico como PNG
     try:
         os.makedirs("static", exist_ok=True)
         img_bytes = pio.to_image(fig, format="png", width=1000, height=600)
@@ -347,7 +365,7 @@ def dashboard():
     except Exception as e:
         print(f"[ERRO] Falha ao salvar imagem do gráfico: {e}")
 
-    # 🔍 Veículos pendentes até ontem
+    # 🛑 Pendentes até ontem (veículos que faltaram)
     pendentes = Programacao.query.filter(
         Programacao.data < date.today(),
         Programacao.compareceu == False,
@@ -533,15 +551,21 @@ def pre_vistoria():
         return redirect(url_for("programacao"))
 
     return render_template("pre_vistoria.html", programacoes=programacoes, data=hoje.strftime("%d/%m/%Y"))
-
-
-   
 @app.route("/veiculo/<int:numero>")
 def historico_veiculo(numero):
+    tipo_filtro = request.args.get("tipo", "todos")
     veiculo = Veiculo.query.filter_by(numero_frota=numero).first_or_404()
-    vistorias = Programacao.query.filter_by(veiculo_id=veiculo.id).order_by(Programacao.data.desc()).all()
+    
+    query = Programacao.query.filter_by(veiculo_id=veiculo.id).order_by(Programacao.data.desc())
 
-    return render_template("historico_veiculo.html", veiculo=veiculo, vistorias=vistorias)
+    if tipo_filtro == "par":
+        query = query.join(Veiculo).filter(Veiculo.tipo_frota == "PAR")
+    elif tipo_filtro == "impar":
+        query = query.join(Veiculo).filter(Veiculo.tipo_frota == "IMPAR")
+
+    historico = query.all()
+    return render_template("historico_veiculo.html", veiculo=veiculo, historico=historico, tipo_filtro=tipo_filtro)
+
 @app.route("/ranking")
 def ranking():
     mes = int(request.args.get("mes", date.today().month))
@@ -610,8 +634,8 @@ def reset_dados():
     hoje = date.today()
     Programacao.query.filter(Programacao.data < hoje).delete()
     db.session.commit()
-
     return redirect(url_for("programacao"))
+
 
 @app.route("/exportar_dashboard/png")
 def exportar_dashboard_png():
@@ -645,6 +669,24 @@ def exportar_dashboard_pdf():
 
     return send_file(output_path, mimetype="application/pdf", as_attachment=True)
 
+
+@app.route("/adicionar_veiculo", methods=["GET", "POST"])
+@login_required
+def adicionar_veiculo():
+    if request.method == "POST":
+        numero = request.form.get("numero")
+        tipo_frota = request.form.get("tipo_frota")
+
+        if numero and tipo_frota in ["PAR", "IMPAR"]:
+            novo = Veiculo(numero_frota=int(numero), tipo_frota=tipo_frota, status="ativo")
+            db.session.add(novo)
+            db.session.commit()
+            return redirect(url_for("index"))
+
+    return render_template("adicionar_veiculo.html")
+
+
+# Inicialização principal
 if __name__ == "__main__":
     from flask_migrate import upgrade
     with app.app_context():
