@@ -1,12 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Histórico do Veículo {{ numero }}{% endblock %}
+{% block title %}Histórico do Veículo {{ veiculo.numero_frota }}{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h2>Histórico do Veículo Nº {{ numero }}</h2>
+    <h2>Histórico do Veículo Nº {{ veiculo.numero_frota }}</h2>
     <p class="text-muted">Todas as vistorias registradas até hoje</p>
 
-    <table class="table table-bordered table-hover mt-3">
+    <div class="btn-group mt-3 mb-4" role="group">
+        <a href="{{ url_for('historico_veiculo', numero=veiculo.numero_frota, tipo='todos') }}" class="btn btn-outline-light {% if tipo_filtro == 'todos' %}active{% endif %}">Todos</a>
+        <a href="{{ url_for('historico_veiculo', numero=veiculo.numero_frota, tipo='par') }}" class="btn btn-outline-light {% if tipo_filtro == 'par' %}active{% endif %}">Frota Par</a>
+        <a href="{{ url_for('historico_veiculo', numero=veiculo.numero_frota, tipo='impar') }}" class="btn btn-outline-light {% if tipo_filtro == 'impar' %}active{% endif %}">Frota Ímpar</a>
+    </div>
+
+    <table class="table table-bordered table-hover">
         <thead class="table-dark text-warning">
             <tr>
                 <th>Data</th>
