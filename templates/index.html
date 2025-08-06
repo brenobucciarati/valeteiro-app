@@ -23,15 +23,19 @@
         margin-bottom: 2rem;
     }
 
-    .btn-purple {
-        background: #6a0dad;
-        color: #fff;
+    .btn-purple, .btn-add, .btn-reset {
         font-size: 1.2rem;
         padding: 1rem;
         border: none;
-        transition: all 0.3s ease;
-        box-shadow: 0 0 10px #6a0dad80;
         border-radius: 0.6rem;
+        width: 100%;
+        transition: 0.3s;
+    }
+
+    .btn-purple {
+        background: #6a0dad;
+        color: white;
+        box-shadow: 0 0 10px #6a0dad80;
     }
 
     .btn-purple:hover {
@@ -39,40 +43,22 @@
         transform: scale(1.05);
         box-shadow: 0 0 15px #6a0dadcc;
     }
-</style>
 
-<div class="dashboard-container text-center mt-5">
-    <h1 class="dashboard-title">🚐 Sistema de Vistorias de Veículos</h1>
-    <p class="dashboard-subtitle">Bem-vindo! Use o menu abaixo para navegar entre as funcionalidades.</p>
+    .btn-add {
+        background-color: #198754;
+        color: white;
+        box-shadow: 0 0 10px #19875480;
+    }
 
-    <div class="row justify-content-center">
-        <div class="col-md-4 col-lg-3 mb-3">
-            <a href="/programacao" class="btn btn-purple w-100">🗓️ Programação</a>
-        </div>
-        <div class="col-md-4 col-lg-3 mb-3">
-            <a href="/pre_vistoria" class="btn btn-purple w-100">✅ Liberar Veículos</a>
-        </div>
-        <div class="col-md-4 col-lg-3 mb-3">
-            <a href="/vistoria" class="btn btn-purple w-100">📝 Vistoria</a>
-        </div>
-        <div class="col-md-4 col-lg-3 mb-3">
-            <a href="/dashboard" class="btn btn-purple w-100">📊 Dashboard</a>
-        </div>
-        <div class="col-md-4 col-lg-3 mb-3">
-            <a href="/risco" class="btn btn-purple w-100">⚠️ Risco</a>
-        </div>
-        <div class="col-md-4 col-lg-3 mb-3">
-            <a href="/relatorio_botao" class="btn btn-purple w-100">📄 Relatório</a>
-        </div>
-    <style>
+    .btn-add:hover {
+        background-color: #157347;
+        transform: scale(1.05);
+        box-shadow: 0 0 15px #198754cc;
+    }
+
     .btn-reset {
         background-color: #dc3545;
         color: white;
-        font-size: 1.2rem;
-        padding: 1rem;
-        border: none;
-        border-radius: 0.6rem;
-        transition: 0.3s;
         box-shadow: 0 0 10px #dc354580;
     }
 
@@ -83,12 +69,40 @@
     }
 </style>
 
-<div class="col-md-4 col-lg-3 mb-3">
-    <form method="POST" action="{{ url_for('reset_dados') }}" onsubmit="return confirm('⚠️ Tem certeza que deseja RESETAR TODOS OS DADOS?');">
-        <button type="submit" class="btn-reset w-100">
-            🧨 Resetar Tudo
-        </button>
-    </form>
-</div>
+<div class="dashboard-container text-center mt-5">
+    <h1 class="dashboard-title">🚐 Sistema de Vistorias de Veículos</h1>
+    <p class="dashboard-subtitle">Bem-vindo! Use o menu abaixo para navegar entre as funcionalidades.</p>
 
+    <div class="row justify-content-center g-3">
+        <!-- Primeira linha -->
+        <div class="col-md-3 col-sm-6">
+            <a href="/programacao" class="btn btn-purple">🗓️ Programação</a>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <a href="/pre_vistoria" class="btn btn-purple">✅ Liberar Veículos</a>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <a href="/vistoria" class="btn btn-purple">📝 Vistoria</a>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <a href="/dashboard" class="btn btn-purple">📊 Dashboard</a>
+        </div>
+
+        <!-- Segunda linha -->
+        <div class="col-md-3 col-sm-6">
+            <a href="/risco" class="btn btn-purple">⚠️ Risco</a>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <a href="/relatorio_botao" class="btn btn-purple">📄 Relatório</a>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <a href="/adicionar_veiculo" class="btn btn-add">➕ Adicionar Veículo</a>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <form method="POST" action="{{ url_for('reset_dados') }}" onsubmit="return confirm('⚠️ Tem certeza que deseja RESETAR TODOS OS DADOS?');">
+                <button type="submit" class="btn btn-reset">🧨 Resetar Tudo</button>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
