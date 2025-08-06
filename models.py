@@ -10,6 +10,8 @@ class Veiculo(db.Model):
     numero_frota = db.Column(db.Integer, nullable=False, unique=True)
     tipo_frota = db.Column(db.String(10), nullable=False)
     status = db.Column(db.String(20), default='ativo')
+    observacao = db.Column(db.String(255))  # ⬅️ novo campo
+
 
 class Programacao(db.Model):
     __tablename__ = 'programacoes'
