@@ -1,0 +1,37 @@
+# 🐍 Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# 🗂️ Diretórios do ambiente virtual
+.env/
+.venv/
+env/
+venv/
+ENV/
+
+# 🧪 Arquivos de testes e logs
+*.log
+*.pytest_cache/
+.coverage
+.cache/
+
+# 🧱 Banco de dados
+*.db
+*.sqlite3
+
+# 🛠️ Flask-Migrate
+migrations/
+
+# ⚙️ Configurações locais
+instance/
+config.py
+
+# 📦 VSCode e outros IDEs
+.vscode/
+.idea/
+
+# 🚫 Arquivos do sistema
+.DS_Store
+Thumbs.db
