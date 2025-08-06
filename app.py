@@ -550,7 +550,13 @@ def pre_vistoria():
         db.session.commit()
         return redirect(url_for("programacao"))
 
-    return render_template("pre_vistoria.html", programacoes=programacoes, data=hoje.strftime("%d/%m/%Y"))
+    return render_template(
+        "pre_vistoria.html",
+        programacoes=programacoes,
+        data=hoje.strftime("%d/%m/%Y"),
+        hoje=hoje  # ✅ Adicionado aqui
+    )
+
 @app.route("/veiculo/<int:numero>")
 def historico_veiculo(numero):
     tipo_filtro = request.args.get("tipo", "todos")
@@ -677,14 +683,20 @@ def adicionar_veiculo():
         numero = request.form.get("numero")
         tipo_frota = request.form.get("tipo_frota")
 
-        if numero and tipo_frota in ["PAR", "IMPAR"]:
-            novo = Veiculo(numero_frota=int(numero), tipo_frota=tipo_frota, status="ativo")
-            db.session.add(novo)
-            db.session.commit()
-            return redirect(url_for("index"))
+        if numero and tipo_frota and tipo_frota in ["PAR", "IMPAR"]:
+            try:
+                novo = Veiculo(
+                    numero_frota=int(numero),
+                    tipo_frota=tipo_frota,
+                    status="ativo"
+                )
+                db.session.add(novo)
+                db.session.commit()
+                return redirect(url_for("index"))
+            except Exception as e:
+                print(f"Erro ao adicionar veículo: {e}")
 
     return render_template("adicionar_veiculo.html")
-
 
 # Inicialização principal
 if __name__ == "__main__":
