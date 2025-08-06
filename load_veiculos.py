@@ -8,12 +8,21 @@ frota_impar = [1443, 1445, 1447, 1449, 1451, 1453, 1455, 1457, 1459, 1461, 1463,
 with app.app_context():
     for numero in frota_par:
         if not Veiculo.query.filter_by(numero_frota=numero).first():
-            db.session.add(Veiculo(numero_frota=numero, tipo_frota='PAR'))
+            db.session.add(Veiculo(
+                numero_frota=numero,
+                tipo_frota='PAR',
+                status='ativo',
+                observacao=None  # ou algum texto, se quiser
+            ))
 
     for numero in frota_impar:
         if not Veiculo.query.filter_by(numero_frota=numero).first():
-            db.session.add(Veiculo(numero_frota=numero, tipo_frota='IMPAR'))
-            db.session.commit() 
+            db.session.add(Veiculo(
+                numero_frota=numero,
+                tipo_frota='IMPAR',
+                status='ativo',
+                observacao=None
+            ))
 
     db.session.commit()
     print("Frota PAR e IMPAR cadastradas com sucesso!")

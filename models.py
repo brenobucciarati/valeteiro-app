@@ -7,10 +7,11 @@ db = SQLAlchemy()
 class Veiculo(db.Model):
     __tablename__ = 'veiculos'
     id = db.Column(db.Integer, primary_key=True)
-    numero_frota = db.Column(db.Integer, nullable=False, unique=True)
+    numero_frota = db.Column(db.Integer, nullable=False)
     tipo_frota = db.Column(db.String(10), nullable=False)
-    status = db.Column(db.String(20), default='ativo')
-    observacao = db.Column(db.String(255))  # ⬅️ novo campo
+    status = db.Column(db.String(10), nullable=False)
+    observacao = db.Column(db.String(255))
+
 
 
 class Programacao(db.Model):

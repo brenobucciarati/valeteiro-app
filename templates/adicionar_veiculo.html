@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Adicionar Veículo{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Adicionar Novo Veículo à Frota</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="numero" class="form-label">Número da Frota</label>
+            <input type="number" name="numero" id="numero" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="tipo_frota" class="form-label">Tipo de Frota</label>
+            <select name="tipo_frota" id="tipo_frota" class="form-select" required>
+                <option value="">Selecione</option>
+                <option value="PAR">Par</option>
+                <option value="IMPAR">Ímpar</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-success">Adicionar</button>
+    </form>
+</div>
+{% endblock %}
