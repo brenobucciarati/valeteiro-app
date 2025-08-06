@@ -3,7 +3,9 @@
 {% block title %}Dashboard de Vistorias{% endblock %}
 
 {% block content %}
-<h2 class="mt-4 text-light">📊 Gráfico de Vistorias por Veículo</h2>
+<fieldset class="border p-3 rounded bg-dark">
+    <legend class="text-light fs-4">📊 Gráfico de Vistorias por Veículo</legend>
+
 
 <form method="get" class="row g-3 mt-3">
     <div class="col-md-2">
@@ -26,8 +28,8 @@
         <button type="submit" class="btn btn-outline-warning w-100">🔍 Filtrar</button>
     </div>
     <div class="col-md-2 align-self-end text-end">
-        <a href="{{ url_for('exportar_dashboard_png', mes=mes, ano=ano, frota=frota) }}" class="btn btn-outline-success w-100 mb-1">🖼️ PNG</a>
-        <a href="{{ url_for('exportar_dashboard_pdf', mes=mes, ano=ano, frota=frota) }}" class="btn btn-outline-info w-100">📄 PDF</a>
+       <a href="{{ url_for('exportar_dashboard_png') }}" class="btn btn-outline-success w-100 mb-1">🖼️ PNG</a>
+        <a href="{{ url_for('exportar_dashboard_pdf') }}" class="btn btn-outline-info w-100">📄 PDF</a>
     </div>
 </form>
 
