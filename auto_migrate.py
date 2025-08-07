@@ -2,17 +2,20 @@ from app import app, db
 from models import User
 from flask_migrate import upgrade, downgrade
 from alembic.config import Config
+import os
 
 print("🔁 Aplicando migrações...")
 
+# Caminho absoluto do alembic.ini
+base_dir = os.path.abspath(os.path.dirname(__file__))
+alembic_cfg = Config(os.path.join(base_dir, "migrations", "alembic.ini"))
+
 with app.app_context():
-    alembic_cfg = Config("migrations/alembic.ini")
-
     print("🔄 Realizando downgrade...")
-    downgrade(alembic_cfg, 'base')  # desfaz tudo
+    downgrade(alembic_cfg, 'base')  # volta ao início
 
-    print("🔼 Reaplicando upgrade...")
-    upgrade()
+    print("🔼 Realizando upgrade...")
+    upgrade(alembic_cfg)
 
     print("✅ Migrações aplicadas com sucesso.")
 
@@ -24,7 +27,6 @@ with app.app_context():
     else:
         print("✏️ Atualizando senha do admin...")
 
-    user.set_password("admin@2025")  # senha segura com hash
+    user.set_password("admin@2025")  # força a senha correta
     db.session.add(user)
     db.session.commit()
-    print("🔐 Senha do admin definida com sucesso.")
