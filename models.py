@@ -27,8 +27,8 @@ class Programacao(db.Model):
 
     veiculo = db.relationship("Veiculo", backref="programacoes")
 
-class User(db.Model):
-    __tablename__ = "users"  # <- Adicione esta linha
+class User(db.Model, UserMixin):
+    __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
@@ -38,8 +38,3 @@ class User(db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
-
-
