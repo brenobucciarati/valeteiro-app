@@ -7,12 +7,14 @@ with app.app_context():
     upgrade()
     print("✅ Migrações aplicadas com sucesso.")
 
-    # Criar usuário admin se não existir
-    if not User.query.filter_by(username="admin").first():
+    # Criar ou atualizar usuário admin
+    user = User.query.filter_by(username="admin").first()
+    if not user:
         user = User(username="admin")
-        user.set_password("admin@2025")
-        db.session.add(user)
-        db.session.commit()
-        print("✅ Usuário admin criado com sucesso.")
+        print("🆕 Criando usuário admin...")
     else:
-        print("ℹ️ Usuário admin já existe.")
+        print("✏️ Atualizando senha do admin...")
+
+    user.set_password("admin@2025")  # força a senha correta
+    db.session.add(user)
+    db.session.commit()
