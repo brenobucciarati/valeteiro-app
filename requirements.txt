@@ -11,3 +11,4 @@ fpdf2==2.8.3
 Pillow
 Babel
 gunicorn
+psycopg2-binary
