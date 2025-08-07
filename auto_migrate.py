@@ -1,31 +1,20 @@
 from app import app, db
 from models import User
-from flask_migrate import upgrade, downgrade
-import os
-from alembic.config import Config
-
-print("🔁 Aplicando migrações...")
+from flask_migrate import upgrade
 
 with app.app_context():
-    alembic_cfg = Config("alembic.ini")
-    alembic_cfg.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL"))  # ou SQLite local
+    print("🔁 Aplicando migrações...")
+    print("📦 Usando banco de dados:", app.config["SQLALCHEMY_DATABASE_URI"])  # <-- DEBUG CRUCIAL
 
-    print("🔄 Realizando downgrade...")
-    downgrade(alembic_cfg, 'base')
-
-    print("⬆️ Realizando upgrade...")
-    upgrade(alembic_cfg)
-
+    upgrade()
     print("✅ Migrações aplicadas com sucesso.")
 
-    # Criação/atualização do admin
-    user = User.query.filter_by(username="admin").first()
-    if not user:
+    existing_user = User.query.filter_by(username="admin").first()
+    if not existing_user:
         user = User(username="admin")
-        print("🆕 Criando usuário admin...")
+        user.set_password("admin@2025")
+        db.session.add(user)
+        db.session.commit()
+        print("✅ Usuário admin criado.")
     else:
-        print("✏️ Atualizando senha do admin...")
-
-    user.set_password("admin@2025")
-    db.session.add(user)
-    db.session.commit()
+        print("ℹ️ Usuário admin já existe.")
