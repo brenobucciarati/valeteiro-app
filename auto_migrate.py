@@ -8,7 +8,7 @@ print("🔁 Aplicando migrações...")
 
 # Caminho absoluto do alembic.ini
 base_dir = os.path.abspath(os.path.dirname(__file__))
-alembic_cfg = Config(os.path.join(base_dir, "migrations", "alembic.ini"))
+alembic_cfg = Config(os.path.join(base_dir, "alembic.ini"))
 
 with app.app_context():
     print("🔄 Realizando downgrade...")
@@ -30,3 +30,4 @@ with app.app_context():
     user.set_password("admin@2025")  # força a senha correta
     db.session.add(user)
     db.session.commit()
+
