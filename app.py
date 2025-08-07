@@ -697,18 +697,6 @@ def adicionar_veiculo():
                 print(f"Erro ao adicionar veículo: {e}")
 
     return render_template("adicionar_veiculo.html")
-from flask import Flask
-from models import db, User  # Garanta que está importando User corretamente
-
-@app.route("/criar_admin")
-def criar_admin():
-    if User.query.filter_by(username="admin").first():
-        return "Usuário já existe"
-    novo = User(username="admin")
-    novo.set_password("admin@2025")
-    db.session.add(novo)
-    db.session.commit()
-    return "Usuário admin criado com sucesso"
 
 # Inicialização principal
 if __name__ == "__main__":
@@ -719,4 +707,5 @@ if __name__ == "__main__":
         
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
