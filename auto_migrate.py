@@ -1,10 +1,15 @@
+# auto_migrate.py
+
+from flask_migrate import upgrade
+from app import app, db  # <-- ESSENCIAL: certifique-se que 'app' e 'db' vêm do seu app Flask
+
 with app.app_context():
     try:
         print("🔁 Aplicando migrações...")
         upgrade()
         print("✅ Migrações aplicadas com sucesso.")
 
-        from models import User  # certifique-se de importar aqui dentro do contexto
+        from models import User  # ou o caminho correto para o seu modelo
 
         # Criar usuário admin se não existir
         if not User.query.filter_by(username="admin").first():
