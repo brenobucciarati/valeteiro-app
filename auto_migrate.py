@@ -1,10 +1,19 @@
 from app import app, db
 from models import User
-from flask_migrate import upgrade
+from flask_migrate import upgrade, downgrade
+from alembic.config import Config
 
 print("🔁 Aplicando migrações...")
+
 with app.app_context():
+    alembic_cfg = Config("migrations/alembic.ini")
+
+    print("🔄 Realizando downgrade...")
+    downgrade(alembic_cfg, 'base')  # desfaz tudo
+
+    print("🔼 Reaplicando upgrade...")
     upgrade()
+
     print("✅ Migrações aplicadas com sucesso.")
 
     # Criar ou atualizar usuário admin
@@ -15,6 +24,7 @@ with app.app_context():
     else:
         print("✏️ Atualizando senha do admin...")
 
-    user.set_password("admin@2025")  # força a senha correta
+    user.set_password("admin@2025")  # senha segura com hash
     db.session.add(user)
     db.session.commit()
+    print("🔐 Senha do admin definida com sucesso.")
